@@ -191,7 +191,6 @@ export const generatePackingPDF = ({ rows, firmName, customerName, designNo, dat
               </tr>
             </tbody>
           </table>
-          // <div class="footer">Signature: _______________________</div>
         </div>
       `);
     });
@@ -360,7 +359,6 @@ export const generateCombinedPDF = ({ rows, firmName, customerName, designNo, da
               </tr>
             </tbody>
           </table>
-           <div class="footer">Signature: _______________________</div>
         </div>
       `);
     });
