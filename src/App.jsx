@@ -3,16 +3,12 @@ import React, { useState } from "react";
 function App() {
   const [firmName, setFirmName] = useState("Sujata Textiles");
   const [customerName, setCustomerName] = useState("Motilal Fabrics");
+  const [designNo, setDesignNo] = useState("DSN001");
+  const [date, setDate] = useState(new Date().toISOString().substr(0, 10));
   const [rows, setRows] = useState([
     { packageNumber: "PKG001", itemName: "Cotton Saree", qty: 10 },
     { packageNumber: "PKG001", itemName: "Silk Saree", qty: 5 },
     { packageNumber: "PKG002", itemName: "Linen Saree", qty: 8 },
-    { packageNumber: "PKG003", itemName: "Linen Saree", qty: 8 },
-    { packageNumber: "PKG004", itemName: "Linen Saree", qty: 8 },
-    { packageNumber: "PKG005", itemName: "Linen Saree", qty: 8 },
-    { packageNumber: "PKG006", itemName: "Linen Saree", qty: 8 },
-    { packageNumber: "PKG007", itemName: "Linen Saree", qty: 8 },
-    { packageNumber: "PKG00", itemName: "Linen Saree", qty: 8 },
   ]);
 
   const addRow = () => {
@@ -49,30 +45,41 @@ function App() {
         <head>
           <title>Packing Slips PDF</title>
           <style>
-            body { font-family: sans-serif; padding: 20px; }
+            body { font-family: Arial, sans-serif; padding: 20px; }
             .page { display: flex; flex-wrap: wrap; page-break-after: always; }
             .slip {
               width: 48%;
-              border: 1px solid #ccc;
-              border-radius: 8px;
-              padding: 12px;
+              border: 1px solid #000;
+              padding: 10px;
               margin: 1%;
               box-sizing: border-box;
-              background: white;
             }
             .header {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              border-bottom: 1px solid #ddd;
-              padding-bottom: 8px;
-              margin-bottom: 8px;
+              text-align: center;
+              font-weight: bold;
+              font-size: 18px;
+              margin-bottom: 10px;
+              border-bottom: 1px solid #000;
+              padding-bottom: 5px;
             }
-            .logo { height: 40px; }
-            .info { font-size: 14px; margin-bottom: 4px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th, td { border: 1px solid #ddd; padding: 6px; text-align: left; font-size: 14px; }
-            th { background-color: #f0f0f0; }
+            .info {
+              font-size: 14px;
+              margin: 4px 0;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 10px;
+              font-size: 14px;
+            }
+            th, td {
+              border: 1px solid #000;
+              padding: 5px;
+              text-align: left;
+            }
+            th {
+              background-color: #f0f0f0;
+            }
             @media print {
               .page { page-break-after: always; }
             }
@@ -89,17 +96,17 @@ function App() {
         const items = grouped[pkgNum];
         popup.document.write(`
           <div class="slip">
-            <div class="header">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/512px-React-icon.svg.png" class="logo" />
-              <h2>${firmName}</h2>
-            </div>
+            <div class="header">Packing Slip</div>
+            <div class="info"><strong>Firm:</strong> ${firmName}</div>
             <div class="info"><strong>Customer:</strong> ${customerName}</div>
-            <div class="info"><strong>Package #:</strong> ${pkgNum}</div>
+            <div class="info"><strong>Package No:</strong> ${pkgNum}</div>
+            <div class="info"><strong>Design No:</strong> ${designNo}</div>
+            <div class="info"><strong>Date:</strong> ${date}</div>
             <table>
               <thead>
                 <tr>
                   <th>Item Name</th>
-                  <th>Qty</th>
+                  <th>Quantity</th>
                 </tr>
               </thead>
               <tbody>
@@ -145,6 +152,16 @@ function App() {
           value={customerName}
           onChange={(e) => setCustomerName(e.target.value)}
           placeholder="Customer Name"
+        />
+        <input
+          value={designNo}
+          onChange={(e) => setDesignNo(e.target.value)}
+          placeholder="Design No."
+        />
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
         />
       </div>
 
