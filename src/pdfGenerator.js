@@ -123,6 +123,8 @@ export const generatePackingPDF = ({ rows, firmName, customerName, designNo, dat
             font-size: 14px;
             display: block;
           }
+          .meta { text-align: center; font-size: 14px; margin-bottom: 20px; }
+
           .header {
             display: flex;
             align-items: center;
@@ -189,7 +191,7 @@ export const generatePackingPDF = ({ rows, firmName, customerName, designNo, dat
               </tr>
             </tbody>
           </table>
-          <div class="footer">Signature: _______________________</div>
+          // <div class="footer">Signature: _______________________</div>
         </div>
       `);
     });
@@ -225,6 +227,8 @@ export const generateCombinedPDF = ({ rows, firmName, customerName, designNo, da
   const grouped = groupByPackage(rows);
   const pkgNumbers = Object.keys(grouped);
   const popup = window.open("", "_blank");
+  const formattedDate = new Date(date).toLocaleDateString();
+
 
   popup.document.write(`
     <html>
@@ -261,6 +265,8 @@ export const generateCombinedPDF = ({ rows, firmName, customerName, designNo, da
             font-size: 14px;
             display: block;
           }
+          .meta { text-align: center; font-size: 14px; margin-bottom: 20px; }
+
 
           .info { font-size: 14px; margin-bottom: 4px; }
           .footer { margin-top: 10px; font-size: 12px; text-align: right; }
@@ -270,7 +276,13 @@ export const generateCombinedPDF = ({ rows, firmName, customerName, designNo, da
       </head>
       <body>
         <div class="firm-name">${firmName}</div>
+        <div class="firm-details">
+          10/214, Behind Radhakrishna Theatre,<br />
+          ICHALKARANJI -416 115. ® (0230) 2436904
+        </div>
         <div class="customer-name">Customer: ${customerName}</div>
+        <div class="meta"> Date: ${formattedDate} | Design No: ${designNo} </div>
+
 
         <div class="summary-page">
   `);
@@ -348,7 +360,7 @@ export const generateCombinedPDF = ({ rows, firmName, customerName, designNo, da
               </tr>
             </tbody>
           </table>
-          <div class="footer">Signature: _______________________</div>
+           <div class="footer">Signature: _______________________</div>
         </div>
       `);
     });
