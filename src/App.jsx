@@ -4,14 +4,12 @@ import { generateSummaryPDF,generatePackingPDF,generateCombinedPDF} from "./pdfG
 
 
 function App() {
-  const [firmName, setFirmName] = useState("Sujata Textiles");
+  const [firmName, setFirmName] = useState("Sujata Trading Company");
   const [customerName, setCustomerName] = useState("Motilal Fabrics");
-  const [designNo, setDesignNo] = useState("D1234");
+  const [designNo, setDesignNo] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [rows, setRows] = useState([
-    { packageNumber: "PKG001", itemName: "Cotton Saree", taga: 1, qty: 10 },
-    { packageNumber: "PKG001", itemName: "Silk Saree", taga: 2, qty: 5 },
-    { packageNumber: "PKG002", itemName: "Linen Saree", taga: 1, qty: 8 },
+    { packageNumber: "BN-001", itemName: " ", taga: 1, qty: 10 },
   ]);
 
 
@@ -24,7 +22,20 @@ function App() {
       packageNumber: newPackageNumber,
       itemName: lastRow?.itemName || "",
       taga: lastRow?.taga || 1,
-      qty: 1
+      qty: null
+    };
+    setRows([...rows, newRow]);
+  };
+
+  const additem = () => {
+    const lastRow = rows[rows.length - 1];
+    const newPackageNumber = lastRow ? lastRow.packageNumber : "BN-001";
+
+    const newRow = {
+      packageNumber: newPackageNumber,
+      itemName: lastRow?.itemName || "",
+      taga: lastRow?.taga || 1,
+      qty: null
     };
     setRows([...rows, newRow]);
   };
@@ -150,7 +161,8 @@ function App() {
       </table>
 
       <div className="actions">
-        <button className="add" onClick={addRow}>➕ Add Row</button>
+        <button className="add" onClick={addRow}>➕ New Package</button>
+        <button className="add" onClick={additem}>➕ Add item</button>
         <button className="generate" onClick={handleGeneratePackingPDF}>📄 Generate PDF</button>
         <button className="summary" onClick={handleGenerateSummaryPDF}>📊 Generate Summary PDF</button>
         <button className="combined" onClick={handleGenerateCombinedPDF}>🧾 Generate Combined PDF</button>

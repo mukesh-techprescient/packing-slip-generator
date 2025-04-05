@@ -5,7 +5,7 @@
  * If lastPackageNo is not a valid number, defaults to 1.
  */
 export function incrementPackageNumber(pkg) {
-    const match = pkg.match(/^(PKG)(\d+)$/);
+    const match = pkg.match(/^(BN-)(\d+)$/);
     if (match) {
       const prefix = match[1];
       const number = parseInt(match[2], 10) + 1;
