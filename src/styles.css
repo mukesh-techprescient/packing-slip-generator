@@ -82,3 +82,13 @@ body {
     color: white;
   }
   
+  .slip {
+    page-break-after: always;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+    background: white;
+  }
+  

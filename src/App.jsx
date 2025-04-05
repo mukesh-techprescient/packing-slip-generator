@@ -11,10 +11,22 @@ function App() {
     { packageNumber: "PKG002", itemName: "Linen Saree", taga: 1, qty: 8 },
   ]);
 
+  const incrementPackageNumber = (pkg) => {
+    const match = pkg.match(/^(PKG)(\d+)$/);
+    if (match) {
+      const prefix = match[1];
+      const number = parseInt(match[2], 10) + 1;
+      return `${prefix}${number.toString().padStart(3, '0')}`;
+    }
+    return pkg;
+  };
+  
   const addRow = () => {
     const lastRow = rows[rows.length - 1];
+    const newPackageNumber = lastRow ? incrementPackageNumber(lastRow.packageNumber) : "PKG001";
+
     const newRow = {
-      packageNumber: lastRow?.packageNumber || "",
+      packageNumber: newPackageNumber,
       itemName: lastRow?.itemName || "",
       taga: lastRow?.taga || 1,
       qty: 1
@@ -227,52 +239,60 @@ function App() {
 
   const generateCombinedPDF = () => {
     const grouped = groupByPackage(rows);
+    const pkgNumbers = Object.keys(grouped);
     const popup = window.open("", "_blank");
   
     popup.document.write(`
       <html>
         <head>
-          <title>Combined Report</title>
+          <title>Packing Slips</title>
           <style>
-            body { font-family: sans-serif; padding: 20px; }
-            h2 { text-align: center; }
-            .firm-name { text-align: center; font-weight: bold; margin-bottom: 8px; }
+            body { font-family: sans-serif; margin: 20px; }
+            .firm-name { text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 8px; }
             .customer-name { text-align: center; margin-bottom: 20px; font-size: 14px; }
+  
             table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
             th, td { border: 1px solid #ddd; padding: 6px; font-size: 14px; text-align: left; }
             th { background-color: #f0f0f0; }
   
-            .page { display: flex; flex-wrap: wrap; page-break-after: always; }
+            .page { display: flex; flex-wrap: wrap; justify-content: space-between; page-break-after: always; }
             .slip {
               width: 48%;
               border: 1px solid #ccc;
               border-radius: 8px;
               padding: 12px;
-              margin: 1%;
+              margin-bottom: 20px;
               box-sizing: border-box;
               background: white;
             }
+  
             .firm-details {
               font-size: 12px;
               text-align: center;
               margin-bottom: 8px;
               line-height: 1.4;
             }
+  
             .firm-details strong {
               font-size: 14px;
               display: block;
             }
+  
             .info { font-size: 14px; margin-bottom: 4px; }
             .footer { margin-top: 10px; font-size: 12px; text-align: right; }
+  
+            .summary-page { page-break-after: always; }
           </style>
         </head>
         <body>
           <div class="firm-name">${firmName}</div>
           <div class="customer-name">Customer: ${customerName}</div>
+  
+          <div class="summary-page">
     `);
   
-    // Summary Table Section
-    Object.keys(grouped).forEach(pkg => {
+    // Summary tables (on a separate page)
+    pkgNumbers.forEach(pkg => {
       popup.document.write(`
         <h3>Package: ${pkg}</h3>
         <table>
@@ -298,12 +318,14 @@ function App() {
       `);
     });
   
-    // Packing Slips Section
-    const pkgNumbers = Object.keys(grouped);
+    popup.document.write(`</div>`); // close summary page
+  
+    // Packing slips: 6 per page, 2-column layout
     for (let i = 0; i < pkgNumbers.length; i += 6) {
       popup.document.write(`<div class="page">`);
-      const group = pkgNumbers.slice(i, i + 6);
-      group.forEach((pkgNum) => {
+      const currentGroup = pkgNumbers.slice(i, i + 6);
+  
+      currentGroup.forEach(pkgNum => {
         const items = grouped[pkgNum];
         const totalQty = items.reduce((sum, item) => sum + Number(item.qty), 0);
         popup.document.write(`
@@ -327,18 +349,14 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                ${items
-                  .map(
-                    (item, idx) => `
+                ${items.map((item, idx) => `
                   <tr>
                     <td>${idx + 1}</td>
                     <td>${item.itemName}</td>
                     <td>${item.taga}</td>
                     <td>${item.qty}</td>
                   </tr>
-                `
-                  )
-                  .join("")}
+                `).join("")}
                 <tr>
                   <td colspan="3"><strong>Total</strong></td>
                   <td><strong>${totalQty}</strong></td>
@@ -349,9 +367,11 @@ function App() {
           </div>
         `);
       });
-      popup.document.write(`</div>`);
+  
+      popup.document.write(`</div>`); // end page
     }
   
+    // Print and close
     popup.document.write(`
         </body>
         <script>
@@ -365,6 +385,7 @@ function App() {
   
     popup.document.close();
   };
+  
   
 
   return (
