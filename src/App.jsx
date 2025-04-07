@@ -61,29 +61,53 @@ function App() {
   
   };
 
-  const renumberRows = () => {
-    let newRows = [...rows];
+  const handleRenumber = () => {
+    const prefix = PACKAGE_PREFIX;
+    const wb = wayBillNo.trim();
+    const seen = new Set();
+    let counter = 1;
   
-    if (wayBillNo) {
-      // Format: STC-WAYBILL-001
-      newRows = newRows.map((row, index) => ({
-        ...row,
-        packageNumber: `${PACKAGE_PREFIX}-${wayBillNo}-${(index + 1).toString().padStart(3, '0')}`
-      }));
-    } else if (rows.length > 0) {
-      // Use prefix from first row, e.g., STC or STC-XYZ
-      const basePrefixMatch = rows[0].packageNumber.match(/^(.*?)-\d+$/);
-      const basePrefix = basePrefixMatch ? basePrefixMatch[1] : PACKAGE_PREFIX;
+    const updated = rows.map((row) => {
+      let newPkg;
+      if (!seen.has(row.packageNumber)) {
+        newPkg = wb
+          ? `${prefix}-${wb}-${counter.toString().padStart(3, "0")}`
+          : `${prefix}-${counter.toString().padStart(3, "0")}`;
+        seen.add(row.packageNumber);
+        counter++;
+      } else {
+        // Reuse the already computed new package number for this group
+        newPkg = Array.from(seen).find((val, i) => {
+          const basePkg = wb
+            ? `${prefix}-${wb}-${(i + 1).toString().padStart(3, "0")}`
+            : `${prefix}-${(i + 1).toString().padStart(3, "0")}`;
+          return val === row.packageNumber && basePkg;
+        });
+      }
+      return { ...row, packageNumber: newPkg };
+    });
   
-      newRows = newRows.map((row, index) => ({
-        ...row,
-        packageNumber: `${basePrefix}-${(index + 1).toString().padStart(3, '0')}`
-      }));
-    }
-  
-    setRows(newRows);
+    setRows(updated);
   };
   
+  
+  const addSubItem = (index) => {
+    const rowToCopy = rows[index];
+    const newRow = {
+      packageNumber: rowToCopy.packageNumber,
+      itemName: rowToCopy.itemName,
+      taga: rowToCopy.taga,
+      qty: null,
+    };
+  
+    // Insert new row *after* current index
+    const updated = [...rows];
+    updated.splice(index + 1, 0, newRow);
+    setRows(updated);
+  };
+
+  
+
 
   const additem = () => {
     const lastRow = rows[rows.length - 1];
@@ -186,6 +210,8 @@ const totalTaga = rows.reduce((sum, r) => sum + (parseFloat(r.taga) || 0), 0);
         />
       </div>
 
+      <div class="table-scroll">
+
       <table>
         <thead>
           <tr>
@@ -197,71 +223,81 @@ const totalTaga = rows.reduce((sum, r) => sum + (parseFloat(r.taga) || 0), 0);
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, i) => (
-            <tr key={i}>
-              <td>
-                <input
-                  value={row.packageNumber}
-                  onChange={(e) =>
-                    updateRow(i, "packageNumber", e.target.value)
-                  }
-                />
-              </td>
-              <td>
-                <input
-                  value={row.itemName}
-                  onChange={(e) => updateRow(i, "itemName", e.target.value)}
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  min={1}
-                  value={row.taga}
-                  onChange={(e) => updateRow(i, "taga", e.target.value)}
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  min={1}
-                  value={row.qty}
-                  onChange={(e) => updateRow(i, "qty", e.target.value)}
-                  onKeyDown={handleEnterInQty}
-                  ref={(el) => (qtyRefs.current[i] = el)}
-                />
-              </td>
-              <td>
-                <button onClick={() => removeRow(i)}>✖</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+  {(() => {
+    const grouped = rows.reduce((acc, row, i) => {
+      const key = row.packageNumber;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push({ ...row, index: i });
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).flatMap(([pkg, groupRows]) => {
+      return groupRows.map((row, idx) => (
+        <tr key={row.index}>
+          {idx === 0 && (
+            <td rowSpan={groupRows.length}>
+              <input
+                value={row.packageNumber}
+                onChange={(e) => updateRow(row.index, "packageNumber", e.target.value)}
+              />
+            </td>
+          )}
+          <td>
+            <input
+              value={row.itemName}
+              onChange={(e) => updateRow(row.index, "itemName", e.target.value)}
+            />
+          </td>
+          <td>
+            <input
+              type="number"
+              min={1}
+              value={row.taga}
+              onChange={(e) => updateRow(row.index, "taga", e.target.value)}
+            />
+          </td>
+          <td>
+            <input
+              type="number"
+              min={1}
+              value={row.qty}
+              onChange={(e) => updateRow(row.index, "qty", e.target.value)}
+              onKeyDown={handleEnterInQty}
+              ref={(el) => (qtyRefs.current[row.index] = el)}
+            />
+          </td>
+          <td className="actions-cell">
+            <button onClick={() => removeRow(row.index)}>✖</button>
+            <button onClick={() => addSubItem(row.index)}>➕ </button>
+
+          </td>
+        </tr>
+      ));
+    });
+  })()}
+</tbody>
+
       </table>
-
-      <div className="totals">Summary - <strong>Total Taga:</strong> {totalTaga} | <strong>Total Mtrs:</strong> {totalQty}</div>
-
-
-      <div className="actions">
-        <button className="add" onClick={addRow}>
-          ➕ New Package
-        </button>
-        <button className="add" onClick={additem}>
-          ➕ Add item
-        </button>
-        <button className="generate" onClick={handleGeneratePackingPDF}>
-          📄 Print Slip
-        </button>
-        <button className="summary" onClick={handleGenerateSummaryPDF}>
-          📊 Print Summary
-        </button>
-        <button className="combined" onClick={handleGenerateCombinedPDF}>
-          🧾 Print Both
-        </button>
-        <button className="renumber" onClick={renumberRows}>
-          🔢 Renumber</button>
-
       </div>
+
+
+
+<div className="footer-bar">
+  <div className="footer-summary">
+   Summary - <strong>Total Taga:</strong> {totalTaga} | <strong>Total Mtrs:</strong> {totalQty}
+
+  </div>
+  <div className="footer-actions">
+    <button className="add" onClick={addRow}>➕ New Package</button>
+    <button className="add" onClick={additem}>➕ Add item</button>
+    <button className="generate" onClick={handleGeneratePackingPDF}>📄 Print Slip</button>
+    <button className="summary" onClick={handleGenerateSummaryPDF}>📊 Print Summary</button>
+    <button className="combined" onClick={handleGenerateCombinedPDF}>🧾 Print Both</button>
+    <button className="renumber" onClick={handleRenumber}>
+          🔢 Renumber</button>
+  </div>
+</div>
+
     </div>
     
   );
