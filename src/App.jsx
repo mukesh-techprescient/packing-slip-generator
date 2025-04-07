@@ -10,6 +10,8 @@ import {
 } from "./pdfGenerator";
 
 function App() {
+  const PACKAGE_PREFIX = "STC";
+
   const [firmName, setFirmName] = useState("Sujata Trading Company");
   const [customerName, setCustomerName] = useState("Motilal Fabrics");
   const [designNo, setDesignNo] = useState("");
@@ -20,7 +22,7 @@ function App() {
 
 
   const [rows, setRows] = useState([
-    { packageNumber: "BN-001", itemName: " ", taga: 1, qty: 10 }
+    { packageNumber: "STC-001", itemName: " ", taga: 1, qty: 10 }
   ]);
 
   const qtyRefs = useRef([]);
@@ -45,8 +47,9 @@ function App() {
   const addRow = () => {
     const lastRow = rows[rows.length - 1];
     const newPackageNumber = lastRow
-      ? incrementPackageNumber(lastRow.packageNumber)
-      : "PKG001";
+    ? incrementPackageNumber(lastRow.packageNumber, wayBillNo, PACKAGE_PREFIX)
+    : (wayBillNo ? `${PACKAGE_PREFIX}-${wayBillNo}-001` : `${PACKAGE_PREFIX}-001`);
+
 
     const newRow = {
       packageNumber: newPackageNumber,
@@ -58,9 +61,33 @@ function App() {
   
   };
 
+  const renumberRows = () => {
+    let newRows = [...rows];
+  
+    if (wayBillNo) {
+      // Format: STC-WAYBILL-001
+      newRows = newRows.map((row, index) => ({
+        ...row,
+        packageNumber: `${PACKAGE_PREFIX}-${wayBillNo}-${(index + 1).toString().padStart(3, '0')}`
+      }));
+    } else if (rows.length > 0) {
+      // Use prefix from first row, e.g., STC or STC-XYZ
+      const basePrefixMatch = rows[0].packageNumber.match(/^(.*?)-\d+$/);
+      const basePrefix = basePrefixMatch ? basePrefixMatch[1] : PACKAGE_PREFIX;
+  
+      newRows = newRows.map((row, index) => ({
+        ...row,
+        packageNumber: `${basePrefix}-${(index + 1).toString().padStart(3, '0')}`
+      }));
+    }
+  
+    setRows(newRows);
+  };
+  
+
   const additem = () => {
     const lastRow = rows[rows.length - 1];
-    const newPackageNumber = lastRow ? lastRow.packageNumber : "BN-001";
+    const newPackageNumber = lastRow ? lastRow.packageNumber : "STC-001";
 
     const newRow = {
       packageNumber: newPackageNumber,
@@ -231,6 +258,9 @@ const totalTaga = rows.reduce((sum, r) => sum + (parseFloat(r.taga) || 0), 0);
         <button className="combined" onClick={handleGenerateCombinedPDF}>
           🧾 Print Both
         </button>
+        <button className="renumber" onClick={renumberRows}>
+          🔢 Renumber</button>
+
       </div>
     </div>
     

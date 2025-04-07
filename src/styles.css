@@ -97,3 +97,30 @@ body {
     font-weight: 500;
   }
   
+  .renumber {
+    background-color: #facc15;
+    border: none;
+    padding: 0.5em 1em;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+
+  
+
+  
+  button.summary {
+    background-color: #f472b6; /* pink */
+    color: white;
+  }
+  
+  button.combined {
+    background-color: #facc15; /* yellow */
+    color: #333;
+  }
+  
+
+  .actions button:hover {
+    opacity: 0.9;
+  }
+  
