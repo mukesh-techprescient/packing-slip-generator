@@ -16,7 +16,6 @@ function App() {
   const [wayBillNo, setWayBillNo] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [enterPressedForNewRow, setEnterPressedForNewRow] = useState(false);
-  const bottomRef = useRef(null);
 
 
 
@@ -56,9 +55,7 @@ function App() {
       qty: null
     };
     setRows([...rows, newRow]);
-    setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+  
   };
 
   const additem = () => {
@@ -72,9 +69,7 @@ function App() {
       qty: null
     };
     setRows([...rows, newRow]);
-    setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+ 
   };
 
   const updateRow = (index, key, value) => {
@@ -241,6 +236,5 @@ const totalTaga = rows.reduce((sum, r) => sum + (parseFloat(r.taga) || 0), 0);
     
   );
 }
-<div ref={bottomRef} />
 
 export default App;
