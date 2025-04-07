@@ -15,6 +15,8 @@ function App() {
   const [designNo, setDesignNo] = useState("");
   const [wayBillNo, setWayBillNo] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [enterPressedForNewRow, setEnterPressedForNewRow] = useState(false);
+
 
   const [rows, setRows] = useState([
     { packageNumber: "BN-001", itemName: " ", taga: 1, qty: 10 }
@@ -22,12 +24,22 @@ function App() {
 
   const qtyRefs = useRef([]);
 
-  useEffect(() => {
+/*   useEffect(() => {
     const lastRef = qtyRefs.current[rows.length - 1];
     if (lastRef) {
       setTimeout(() => lastRef.focus(), 0);
     }
-  }, [rows]);
+  }, [rows]); */
+
+  useEffect(() => {
+    if (enterPressedForNewRow) {
+      const lastRef = qtyRefs.current[rows.length - 1];
+      if (lastRef) {
+        setTimeout(() => lastRef.focus(), 0);
+      }
+      setEnterPressedForNewRow(false); // ✅ reset
+    }
+  }, [rows, enterPressedForNewRow]);
 
   const addRow = () => {
     const lastRow = rows[rows.length - 1];
@@ -72,6 +84,7 @@ function App() {
   const handleEnterInQty = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
+      setEnterPressedForNewRow(true); // ✅ set before adding row
       addRow();
     }
   };
@@ -107,6 +120,9 @@ function App() {
       date
     });
   };
+
+  const totalQty = rows.reduce((sum, r) => sum + (parseFloat(r.qty) || 0), 0);
+const totalTaga = rows.reduce((sum, r) => sum + (parseFloat(r.taga) || 0), 0);
 
   return (
     <div className="container">
@@ -192,6 +208,9 @@ function App() {
           ))}
         </tbody>
       </table>
+
+      <div className="totals">Summary - <strong>Total Taga:</strong> {totalTaga} | <strong>Total Mtrs:</strong> {totalQty}</div>
+
 
       <div className="actions">
         <button className="add" onClick={addRow}>
