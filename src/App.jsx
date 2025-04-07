@@ -7,6 +7,8 @@ function App() {
   const [firmName, setFirmName] = useState("Sujata Trading Company");
   const [customerName, setCustomerName] = useState("Motilal Fabrics");
   const [designNo, setDesignNo] = useState("");
+  const [wayBillNo, setWayBillNo] = useState("");
+
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [rows, setRows] = useState([
     { packageNumber: "BN-001", itemName: " ", taga: 1, qty: 10 },
@@ -60,6 +62,7 @@ function App() {
       firmName,
       customerName,
       designNo,
+      wayBillNo,
       date
     });
   };
@@ -80,13 +83,14 @@ function App() {
       firmName,
       customerName,
       designNo,
+      wayBillNo,
       date
     });
   };
 
   return (
     <div className="container">
-      <h2>Packing Slip PDF Generator</h2>
+      <h2>Packing Slip Generator</h2>
 
       <div className="space-y-4">
         <input
@@ -103,6 +107,11 @@ function App() {
           value={designNo}
           onChange={(e) => setDesignNo(e.target.value)}
           placeholder="Design No."
+        />
+        <input
+          value={wayBillNo}
+          onChange={(e) => setWayBillNo(e.target.value)}
+          placeholder="Way Bill No."
         />
         <input
           type="date"
@@ -163,9 +172,9 @@ function App() {
       <div className="actions">
         <button className="add" onClick={addRow}>➕ New Package</button>
         <button className="add" onClick={additem}>➕ Add item</button>
-        <button className="generate" onClick={handleGeneratePackingPDF}>📄 Generate PDF</button>
-        <button className="summary" onClick={handleGenerateSummaryPDF}>📊 Generate Summary PDF</button>
-        <button className="combined" onClick={handleGenerateCombinedPDF}>🧾 Generate Combined PDF</button>
+        <button className="generate" onClick={handleGeneratePackingPDF}>📄 Print Slip</button>
+        <button className="summary" onClick={handleGenerateSummaryPDF}>📊 Print Summary</button>
+        <button className="combined" onClick={handleGenerateCombinedPDF}>🧾 Print Both</button>
 
       </div>
     </div>

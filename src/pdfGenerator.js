@@ -1,6 +1,6 @@
 import {  groupByPackage } from "./utils";
 
-export const generateSummaryPDF = ({ rows, firmName, customerName, designNo, date, address }) => {
+export const generateSummaryPDF = ({ rows, firmName, customerName, designNo,wayBillNo, date, address }) => {
   const grouped = groupByPackage(rows);
   const popup = window.open("", "_blank");
 
@@ -41,31 +41,56 @@ export const generateSummaryPDF = ({ rows, firmName, customerName, designNo, dat
         <div class="meta">Design No: ${designNo} | Date: ${formattedDate}</div>
   `);
 
+  popup.document.write(`
+    <h3>Packing Slip No - ${wayBillNo}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Sr. No.</th>
+          <th>Item Name</th>
+          <th>Taga</th>
+          <th>Mtrs</th>
+        </tr>
+      </thead>
+      <tbody>
+  `);
+  let totalTaga = 0;
+  let totalQty = 0;
   Object.keys(grouped).forEach(pkg => {
-    popup.document.write(`
-      <h3>Package: ${pkg}</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Sr. No.</th>
-            <th>Item Name</th>
-            <th>Taga</th>
-            <th>Mtrs</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${grouped[pkg].map((item, idx) => `
-            <tr>
-              <td>${idx + 1}</td>
-              <td>${item.itemName}</td>
-              <td>${item.taga}</td>
-              <td>${item.qty}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    `);
+    const items = grouped[pkg];
+    items.forEach((item, idx) => {
+      totalTaga += Number(item.taga);
+      totalQty += Number(item.qty);
+  
+      popup.document.write(`
+        <tr>
+          ${idx === 0 ? `<td rowspan="${items.length}">${pkg}</td>` : ""}
+         
+          <td>${idx + 1}</td>
+          <td>${item.itemName}</td>
+          <td>${item.taga}</td>
+          <td>${item.qty}</td>
+        </tr>
+      `);
+    });
+  
+
   });
+
+  popup.document.write(`
+    <tr>
+      <td colspan="3"><strong>Total</strong></td>
+      <td><strong>${totalTaga}</strong></td>
+      <td><strong>${totalQty}</strong></td>
+    </tr>
+  `);
+  
+  popup.document.write(`
+      </tbody>
+    </table>
+  `);
+  
 
   popup.document.write(`
       </body>
@@ -222,7 +247,7 @@ export const generatePackingPDF = ({ rows, firmName, customerName, designNo, dat
 // utils/generateCombinedPDF.js
 
 
-export const generateCombinedPDF = ({ rows, firmName, customerName, designNo, date }) => {
+export const generateCombinedPDF = ({ rows, firmName, customerName, designNo,wayBillNo, date }) => {
   const grouped = groupByPackage(rows);
   const pkgNumbers = Object.keys(grouped);
   const popup = window.open("", "_blank");
@@ -287,32 +312,55 @@ export const generateCombinedPDF = ({ rows, firmName, customerName, designNo, da
   `);
 
   // Add summary section
-  pkgNumbers.forEach(pkg => {
-    popup.document.write(`
-      <h3>Package: ${pkg}</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Sr. No.</th>
-            <th>Item Name</th>
-            <th>Taga</th>
-            <th>Mtrs</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${grouped[pkg].map((item, idx) => `
-            <tr>
-              <td>${idx + 1}</td>
-              <td>${item.itemName}</td>
-              <td>${item.taga}</td>
-              <td>${item.qty}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    `);
+  popup.document.write(`
+    <h3>Packing Slip No - ${wayBillNo}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Package</th>
+          <th>Sr. No.</th>
+          <th>Item Name</th>
+          <th>Taga</th>
+          <th>Mtrs</th>
+        </tr>
+      </thead>
+      <tbody>
+  `);
+  let totalTaga = 0;
+  let totalQty = 0;
+  Object.keys(grouped).forEach(pkg => {
+    const items = grouped[pkg];
+    items.forEach((item, idx) => {
+      totalTaga += Number(item.taga);
+      totalQty += Number(item.qty);
+  
+      popup.document.write(`
+        <tr>
+          ${idx === 0 ? `<td rowspan="${items.length}">${pkg}</td>` : ""}
+         
+          <td>${idx + 1}</td>
+          <td>${item.itemName}</td>
+          <td>${item.taga}</td>
+          <td>${item.qty}</td>
+        </tr>
+      `);
+    });
+  
+
   });
 
+  popup.document.write(`
+    <tr>
+      <td colspan="3"><strong>Total</strong></td>
+      <td><strong>${totalTaga}</strong></td>
+      <td><strong>${totalQty}</strong></td>
+    </tr>
+  `);
+  
+  popup.document.write(`
+      </tbody>
+    </table>
+  `);
   popup.document.write(`</div>`); // Close summary
 
   // Add packing slips 6 per page
