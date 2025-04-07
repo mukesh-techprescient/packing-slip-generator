@@ -1,24 +1,39 @@
-import React, { useState } from "react";
-import { incrementPackageNumber, groupByPackage } from "./utils";
-import { generateSummaryPDF,generatePackingPDF,generateCombinedPDF} from "./pdfGenerator";
-
+import React, { useState, useRef, useEffect } from "react";
+import {
+  incrementPackageNumber,
+  groupByPackage
+} from "./utils";
+import {
+  generateSummaryPDF,
+  generatePackingPDF,
+  generateCombinedPDF
+} from "./pdfGenerator";
 
 function App() {
   const [firmName, setFirmName] = useState("Sujata Trading Company");
   const [customerName, setCustomerName] = useState("Motilal Fabrics");
   const [designNo, setDesignNo] = useState("");
   const [wayBillNo, setWayBillNo] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [rows, setRows] = useState([
-    { packageNumber: "BN-001", itemName: " ", taga: 1, qty: 10 },
+    { packageNumber: "BN-001", itemName: " ", taga: 1, qty: 10 }
   ]);
 
+  const qtyRefs = useRef([]);
 
-  
+  useEffect(() => {
+    const lastRef = qtyRefs.current[rows.length - 1];
+    if (lastRef) {
+      setTimeout(() => lastRef.focus(), 0);
+    }
+  }, [rows]);
+
   const addRow = () => {
     const lastRow = rows[rows.length - 1];
-    const newPackageNumber = lastRow ? incrementPackageNumber(lastRow.packageNumber) : "PKG001";
+    const newPackageNumber = lastRow
+      ? incrementPackageNumber(lastRow.packageNumber)
+      : "PKG001";
 
     const newRow = {
       packageNumber: newPackageNumber,
@@ -54,7 +69,12 @@ function App() {
     setRows(updated);
   };
 
-
+  const handleEnterInQty = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addRow();
+    }
+  };
 
   const handleGenerateSummaryPDF = () => {
     generateSummaryPDF({
@@ -136,7 +156,9 @@ function App() {
               <td>
                 <input
                   value={row.packageNumber}
-                  onChange={(e) => updateRow(i, "packageNumber", e.target.value)}
+                  onChange={(e) =>
+                    updateRow(i, "packageNumber", e.target.value)
+                  }
                 />
               </td>
               <td>
@@ -159,6 +181,8 @@ function App() {
                   min={1}
                   value={row.qty}
                   onChange={(e) => updateRow(i, "qty", e.target.value)}
+                  onKeyDown={handleEnterInQty}
+                  ref={(el) => (qtyRefs.current[i] = el)}
                 />
               </td>
               <td>
@@ -170,16 +194,24 @@ function App() {
       </table>
 
       <div className="actions">
-        <button className="add" onClick={addRow}>➕ New Package</button>
-        <button className="add" onClick={additem}>➕ Add item</button>
-        <button className="generate" onClick={handleGeneratePackingPDF}>📄 Print Slip</button>
-        <button className="summary" onClick={handleGenerateSummaryPDF}>📊 Print Summary</button>
-        <button className="combined" onClick={handleGenerateCombinedPDF}>🧾 Print Both</button>
-
+        <button className="add" onClick={addRow}>
+          ➕ New Package
+        </button>
+        <button className="add" onClick={additem}>
+          ➕ Add item
+        </button>
+        <button className="generate" onClick={handleGeneratePackingPDF}>
+          📄 Print Slip
+        </button>
+        <button className="summary" onClick={handleGenerateSummaryPDF}>
+          📊 Print Summary
+        </button>
+        <button className="combined" onClick={handleGenerateCombinedPDF}>
+          🧾 Print Both
+        </button>
       </div>
     </div>
   );
 }
-
 
 export default App;
