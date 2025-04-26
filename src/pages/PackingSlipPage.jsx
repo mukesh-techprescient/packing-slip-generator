@@ -172,13 +172,23 @@ const PackingSlipPage = ({ user, handleLogout }) => {
 
   return (
     <div className="container">
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <div>Logged in as: <strong>{user?.email}</strong></div>
-        <button onClick={handleLogout} style={{ padding: "5px 10px", background: "#f44336", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+    {/* Header with Home and Logout */}
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div>Logged in as: <strong>{user?.email}</strong></div>
+      <div>
+        <button 
+          onClick={() => navigate("/")} 
+          style={{ marginRight: "10px", padding: "5px 10px", background: "#1976d2", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+          Home
+        </button>
+        <button 
+          onClick={handleLogout} 
+          style={{ padding: "5px 10px", background: "#f44336", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
           Logout
         </button>
       </div>
+    </div>
+
 
       <h3>Sujata - Packing Slip {slipId ? "(Edit Mode)" : "(New)"}</h3>
 
