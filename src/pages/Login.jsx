@@ -2,15 +2,12 @@ import React from "react";
 import { GoogleLogin } from '@react-oauth/google';
 import jwt_decode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import { allowedUsers } from "../constants";
+
 
 const Login = ({ setUser,setIsAuthenticated }) => {
     const navigate = useNavigate();
 
-  const allowedUsers = [
-    "mukesh.rathod@gmail.com", // ✅ your email
-    "help4mukesh@gmail.com",
-    "sujatatex@gmail.com"      // ✅ you can add more emails
-  ];
 
   const handleLoginSuccess = (credentialResponse) => {
     const decoded = jwt_decode(credentialResponse.credential);
@@ -22,7 +19,7 @@ const Login = ({ setUser,setIsAuthenticated }) => {
       localStorage.setItem("user", JSON.stringify(decoded)); // Store user data in session
       const isAuthenticated = !!localStorage.getItem("user");
       setIsAuthenticated(true); // 👈 tell App that now user is logged in
-      setUser(isAuthenticated)
+      setUser(decoded)
 
       setTimeout(() => navigate("/"), 100); // Small delay to ensure the session is saved
     } else {

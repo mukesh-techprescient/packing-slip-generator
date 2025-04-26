@@ -1,4 +1,4 @@
-function FooterActions({ totalTaga, totalQty, addRow, additem, handleGeneratePackingPDF, handleGenerateSummaryPDF, handleGenerateCombinedPDF, handleRenumber }) {
+function FooterActions({ totalTaga, totalQty, addRow, additem, handleGeneratePackingPDF, handleGenerateSummaryPDF, handleGenerateCombinedPDF, handleRenumber,handleSaveSlip }) {
     return (
       <div className="footer-bar">
         <div className="footer-summary">
@@ -11,6 +11,8 @@ function FooterActions({ totalTaga, totalQty, addRow, additem, handleGeneratePac
           <button className="summary" onClick={handleGenerateSummaryPDF}>📊 Print Summary</button>
           <button className="combined" onClick={handleGenerateCombinedPDF}>🧾 Print Both</button>
           <button className="renumber" onClick={handleRenumber}>🔢 Renumber</button>
+          <button className="save" onClick={handleSaveSlip}>💾 Save Slip</button>
+
         </div>
       </div>
     );
