@@ -6,7 +6,7 @@ import FooterActions from "../components/FooterActions";
 import { incrementPackageNumber } from "../utils";
 import { generateSummaryPDF, generatePackingPDF, generateCombinedPDF } from "../pdfGenerator";
 import { PACKAGE_PREFIX } from "../constants";
-import {  getSlip, updateSlip, createSlip } from "../mockApi"; // 👈 Import APIs
+import {  getSlip, updateSlip, createSlip } from "../api"; // 👈 Import APIs
 
 const PackingSlipPage = ({ user, handleLogout }) => {
   const { id } = useParams(); // 👈 ID from URL if editing

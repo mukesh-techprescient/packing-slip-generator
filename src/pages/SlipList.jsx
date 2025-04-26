@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { listSlips, deleteSlip } from "../mockApi"; // 👈 import deleteSlip also
+import { listSlips, deleteSlip } from "../api"; // 👈 import deleteSlip also
 
 const SlipList = () => {
   const navigate = useNavigate();
