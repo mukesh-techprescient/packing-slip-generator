@@ -1,4 +1,4 @@
-const useLocalStorageAPI = true; // 👈 Toggle this
+const useLocalStorageAPI = false; // 👈 Toggle this
 
 import * as localAPI from "./mockApi";
 import * as realAPI from "./slipsApi";
