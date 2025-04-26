@@ -11,3 +11,6 @@ export const listSlips = api.listSlips;
 export const getSlip = api.getSlip;
 export const updateSlip = api.updateSlip;
 export const deleteSlip = api.deleteSlip;
+export const getFirms = api.getFirms;
+
+

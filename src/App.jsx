@@ -27,7 +27,7 @@ function App() {
 
 
 <Route 
-        path="/new" 
+        path="/slips/new/slip" 
         element={
           isAuthenticated 
             ? <PackingSlipPage user={user} handleLogout={handleLogout} /> 

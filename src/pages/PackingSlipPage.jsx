@@ -6,7 +6,7 @@ import FooterActions from "../components/FooterActions";
 import { incrementPackageNumber } from "../utils";
 import { generateSummaryPDF, generatePackingPDF, generateCombinedPDF } from "../pdfGenerator";
 import { PACKAGE_PREFIX } from "../constants";
-import {  getSlip, updateSlip, createSlip } from "../api"; // 👈 Import APIs
+import {  getSlip, updateSlip, createSlip,getFirms} from "../api"; // 👈 Import APIs
 
 const PackingSlipPage = ({ user, handleLogout }) => {
   const { id } = useParams(); // 👈 ID from URL if editing
@@ -22,12 +22,26 @@ const PackingSlipPage = ({ user, handleLogout }) => {
   const [enterPressedForNewRow, setEnterPressedForNewRow] = useState(false);
   const [rows, setRows] = useState([]);
   const qtyRefs = useRef([]);
+  const [firms, setFirms] = useState([]); // 👈 All firms
+
 
   useEffect(() => {
+    loadFirms();
     if (id) {
       loadSlip(id); // load existing slip if editing
     }
   }, [id]);
+
+
+  const loadFirms = async () => {
+    const allFirms = await getFirms();
+    console.log("Fetched firms:", allFirms);  // 👈 Add this
+    setFirms(allFirms || []);
+      // 👉 Set default firm if firmName is not already set
+  if ((!firmName || firmName === "") && allFirms.length > 0) {
+    setFirmName(allFirms[0].firmName);
+  }
+  };
 
   const loadSlip = async (id) => {
     const existingSlip = await getSlip(id);
@@ -190,10 +204,27 @@ const PackingSlipPage = ({ user, handleLogout }) => {
     </div>
 
 
-      <h3>Sujata - Packing Slip {slipId ? "(Edit Mode)" : "(New)"}</h3>
+
+      <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+  <span>Sujata - Packing Slip {slipId ? "(Edit Mode)" : "(New)"}</span>
+  <select
+  value={firmName}
+  onChange={(e) => setFirmName(e.target.value)}
+  style={{ marginLeft: '10px', padding: '5px', fontSize: '16px' }}
+>
+  <option value="">Select Firm</option>
+  {firms.map((firm) => (
+    <option key={firm.id} value={firm.firmName}>
+      {firm.firmName}
+    </option>
+  ))}
+</select>
+
+</h3>
+
 
       {/* Main Body */}
-      <InputsSection {...{ date, setDate, wayBillNo, setWayBillNo, designNo, setDesignNo, setNo, setSetNo, customerName, setCustomerName, firmName, setFirmName }} />
+      <InputsSection {...{ date, setDate, wayBillNo, setWayBillNo, designNo, setDesignNo, setNo, setSetNo, customerName, setCustomerName, firmName, setFirmName}} />
       <PackingTable {...{ rows, updateRow, removeRow, addSubItem, handleEnterInQty, qtyRefs }} />
       <FooterActions {...{ totalTaga, totalQty, addRow, additem, handleGeneratePackingPDF, handleGenerateSummaryPDF, handleGenerateCombinedPDF, handleRenumber, handleSaveSlip }} />
     </div>

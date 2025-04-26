@@ -1,22 +1,27 @@
-const API_BASE_URL = "https://packingslip-api.onrender.com/slips";
+const SLIP_API_BASE_URL = "https://packingslip-api.onrender.com/slips";
+const API_BASE_URL = "https://packingslip-api.onrender.com";
+
+
+
+
 
 // API: List all slips
 export async function listSlips() {
-  const response = await fetch(API_BASE_URL);
+  const response = await fetch(SLIP_API_BASE_URL);
   if (!response.ok) throw new Error("Failed to fetch slips");
   return response.json();
 }
 
 // API: Get slip by ID
 export async function getSlip(id) {
-  const response = await fetch(`${API_BASE_URL}/${id}`);
+  const response = await fetch(`${SLIP_API_BASE_URL}/${id}`);
   if (!response.ok) throw new Error("Slip not found");
   return response.json();
 }
 
 // API: Create new slip
 export async function createSlip(slip) {
-  const response = await fetch(API_BASE_URL, {
+  const response = await fetch(SLIP_API_BASE_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(slip),
@@ -27,7 +32,7 @@ export async function createSlip(slip) {
 
 // API: Update slip by ID
 export async function updateSlip(slipData) {
-  const response = await fetch(`${API_BASE_URL}/${slipData.id}`, {
+  const response = await fetch(`${SLIP_API_BASE_URL}/${slipData.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(slipData),
@@ -38,9 +43,14 @@ export async function updateSlip(slipData) {
 
 // API: Delete slip by ID
 export async function deleteSlip(id) {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
+  const response = await fetch(`${SLIP_API_BASE_URL}/${id}`, {
     method: "DELETE",
   });
   if (!response.ok) throw new Error("Failed to delete slip");
   return response.json();
 }
+
+export const getFirms = async () => {
+  const response = await fetch(`${API_BASE_URL}/firms`);
+  return await response.json();
+};

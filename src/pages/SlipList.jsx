@@ -27,7 +27,7 @@ const SlipList = () => {
       <h2>Slip Listing</h2>
     {/* 👇 Create New Slip Button */}
     <button 
-        onClick={() => navigate("/slips/new")} 
+        onClick={() => navigate("/slips/new/slip")} 
         style={{ marginBottom: "20px", padding: "10px 20px", backgroundColor: "#4CAF50", color: "white", border: "none", borderRadius: "5px" }}
       >
         Create New Slip

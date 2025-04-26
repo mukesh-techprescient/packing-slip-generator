@@ -6,7 +6,6 @@ function InputsSection({ date, setDate, wayBillNo, setWayBillNo, designNo, setDe
         <input value={designNo} onChange={(e) => setDesignNo(e.target.value)} placeholder="Design No." />
         <input value={setNo} onChange={(e) => setSetNo(e.target.value)} placeholder="Set No." />
         <input value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Customer Name" />
-        <input value={firmName} onChange={(e) => setFirmName(e.target.value)} placeholder="Firm Name" />
       </div>
     );
   }
