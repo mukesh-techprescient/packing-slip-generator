@@ -1,14 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  flexRender,
-} from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, flexRender } from "@tanstack/react-table";
 import { listSlips, deleteSlip } from "../api";
+import { generatePackingPDF, generateSummaryPDF } from "../pdfGenerator";
+import { FaEye, FaTrash, FaFilePdf, FaPrint } from "react-icons/fa"; // 👈 Import FontAwesome icons
+import { Tooltip } from "react-tooltip"; // Correct named import for react-tooltip
+import { formatDate } from "../utils"; // Adjust the path as necessary
+
 
 const SlipList = () => {
   const navigate = useNavigate();
@@ -17,7 +15,7 @@ const SlipList = () => {
   const [sorting, setSorting] = useState([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10, // show 5 items per page
+    pageSize: 10,
   });
 
   useEffect(() => {
@@ -36,8 +34,36 @@ const SlipList = () => {
     }
   };
 
-  const handleLogout = () => {
-    navigate("/login");
+  const handleGeneratePackingPDF = (slip) => {
+    generatePackingPDF({
+      rows: slip.packages.flatMap((pkg) => pkg.items.map((item) => ({
+        packageNumber: pkg.packageNumber,
+        itemName: item.itemName,
+        taga: item.taga,
+        qty: item.qty,
+      }))),
+      firmName: slip.firmName,
+      customerName: slip.customerName,
+      designNo: slip.designNo,
+      wayBillNo: slip.wayBillNo,
+      date: slip.date,
+    });
+  };
+
+  const handleGenerateSummaryPDF = (slip) => {
+    generateSummaryPDF({
+      rows: slip.packages.flatMap((pkg) => pkg.items.map((item) => ({
+        packageNumber: pkg.packageNumber,
+        itemName: item.itemName,
+        taga: item.taga,
+        qty: item.qty,
+      }))),
+      firmName: slip.firmName,
+      customerName: slip.customerName,
+      designNo: slip.designNo,
+      totalMeter: slip.totalQty,
+      totalTaga: slip.totalTaga,
+    });
   };
 
   const columns = useMemo(
@@ -45,12 +71,17 @@ const SlipList = () => {
       {
         accessorKey: "id",
         header: "ID",
-        size: 60, // smaller column for ID
+        size: 60,
         cell: (info) => <div style={{ textAlign: "center" }}>{info.getValue()}</div>,
       },
       {
         accessorKey: "date",
         header: "Date",
+        cell: ({ row }) => (
+          <div style={{ textAlign: "center" }}>
+            {formatDate(row.original.date)} {/* Apply formatDate here */}
+          </div>
+        ),
       },
       {
         accessorKey: "wayBillNo",
@@ -65,53 +96,73 @@ const SlipList = () => {
         header: "Customer Name",
       },
       {
-        accessorKey: "totalMeter",
+        accessorKey: "totalQty",
         header: "Total Meter",
       },
       {
         accessorKey: "totalTaga",
         header: "Total Taga",
       },
-      // {
-      //   accessorKey: "designNo",
-      //   header: "Design No",
-      // },
-      // {
-      //   accessorKey: "setNo",
-      //   header: "Set No",
-      // },
       {
         accessorKey: "actions",
         header: "Actions",
         enableSorting: false,
         cell: ({ row }) => (
           <div style={{ display: "flex", gap: "8px" }}>
-            <button
+            {/* View Button */}
+            <div
+              data-tip="View Slip" // Tooltip target
               onClick={() => navigate(`/slips/${row.original.id}`)}
               style={{
-                padding: "4px 8px",
-                fontSize: "12px",
-                backgroundColor: "#4CAF50",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
+                fontSize: "20px",
                 cursor: "pointer",
+                color: "#616161", // Subtle gray color
               }}
             >
-              View
-            </button>
-            <button
+              <FaEye />
+            </div>
+
+            {/* Delete Button */}
+            <div
+              data-tip="Delete Slip" // Tooltip target
               onClick={() => handleDelete(row.original.id)}
               style={{
-                padding: "4px 8px",
-                fontSize: "12px",
-                color: "red",
-                border: "none",
+                fontSize: "20px",
                 cursor: "pointer",
+                color: "#d32f2f", // A muted red color
               }}
             >
-              Delete
-            </button>
+              <FaTrash />
+            </div>
+
+            {/* Print Packing PDF Button */}
+            <div
+              data-tip="Print Packing Slip" // Tooltip target
+              onClick={() => handleGeneratePackingPDF(row.original)}
+              style={{
+                fontSize: "20px",
+                cursor: "pointer",
+                color: "#1976d2", // Muted blue color
+              }}
+            >
+              <FaFilePdf />
+            </div>
+
+            {/* Print Summary Button */}
+            <div
+              data-tip="Print Summary" // Tooltip target
+              onClick={() => handleGenerateSummaryPDF(row.original)}
+              style={{
+                fontSize: "20px",
+                cursor: "pointer",
+                color: "#FF7043", // Muted orange color
+              }}
+            >
+              <FaPrint />
+            </div>
+
+            {/* Tooltip rendering */}
+            <Tooltip />
           </div>
         ),
       },
@@ -141,8 +192,8 @@ const SlipList = () => {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
         <h2 style={{ fontSize: "18px" }}>Sujata ERP</h2>
-        <button 
-          onClick={handleLogout}
+        <button
+          onClick={() => navigate("/login")}
           style={{
             padding: "4px 8px",
             fontSize: "12px",
@@ -159,8 +210,8 @@ const SlipList = () => {
 
       {/* Buttons Row */}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
-        <button 
-          onClick={() => navigate("/slips/new/slip")} 
+        <button
+          onClick={() => navigate("/slips/new/slip")}
           style={{
             padding: "4px 8px",
             fontSize: "12px",
@@ -211,74 +262,37 @@ const SlipList = () => {
                   }}
                 >
                   {flexRender(header.column.columnDef.header, header.getContext())}
-                  {header.column.getIsSorted() === "asc" && " 🔼"}
-                  {header.column.getIsSorted() === "desc" && " 🔽"}
+                  {header.column.getIsSorted() ? (
+                    <span>{header.column.getIsSorted() === "desc" ? " 🔽" : " 🔼"}</span>
+                  ) : null}
                 </th>
               ))}
             </tr>
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.length > 0 ? (
-            table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} style={{ padding: "6px", fontSize: "12px" }}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={columns.length} align="center" style={{ padding: "10px" }}>
-                No slips found.
-              </td>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id} style={{ padding: "8px", textAlign: "center" }}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
             </tr>
-          )}
+          ))}
         </tbody>
       </table>
 
-      {/* Pagination Controls */}
-      <div
-        style={{
-          marginTop: "20px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div>
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-        </div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            style={{
-              padding: "4px 8px",
-              fontSize: "12px",
-              backgroundColor: "#f1f1f1",
-              cursor: "pointer",
-              borderRadius: "4px",
-            }}
-          >
-            Previous
-          </button>
-          <button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            style={{
-              padding: "4px 8px",
-              fontSize: "12px",
-              backgroundColor: "#f1f1f1",
-              cursor: "pointer",
-              borderRadius: "4px",
-            }}
-          >
-            Next
-          </button>
-        </div>
+      {/* Pagination */}
+      <div>
+        <button onClick={() => table.setPageIndex(0)}>{"<<"}</button>
+        <button onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 1)}>
+          {"<"}
+        </button>
+        <button onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 1)}>
+          {">"}
+        </button>
+        <button onClick={() => table.setPageIndex(table.getPageCount() - 1)}>{">>"}</button>
       </div>
     </div>
   );

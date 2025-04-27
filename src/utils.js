@@ -40,4 +40,13 @@ export function incrementPackageNumber(pkg, wayBillNo, prefix = "STC") {
         return acc;
       }, {});
   }
+
+  export const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0'); // Pad single digits with leading zero
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+    const year = date.getFullYear();
+  
+    return `${day}/${month}/${year}`;
+  };
   
