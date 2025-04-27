@@ -1,20 +1,35 @@
 const SLIP_API_BASE_URL = "https://packingslip-api.onrender.com/slips";
 const API_BASE_URL = "https://packingslip-api.onrender.com";
 
+// Replace with your method of getting the Google Auth token
+const getGoogleAuthToken = () => {
+  // Implement your logic to retrieve the token, e.g., from localStorage or context
+  return localStorage.getItem('googleAuthToken'); // Example using localStorage
+}
 
-
-
+// Helper function to create headers with Google Auth token
+const createAuthHeaders = () => {
+  const token = getGoogleAuthToken();
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${token}`,
+  };
+}
 
 // API: List all slips
 export async function listSlips() {
-  const response = await fetch(SLIP_API_BASE_URL);
+  const response = await fetch(SLIP_API_BASE_URL, {
+    headers: createAuthHeaders(),
+  });
   if (!response.ok) throw new Error("Failed to fetch slips");
   return response.json();
 }
 
 // API: Get slip by ID
 export async function getSlip(id) {
-  const response = await fetch(`${SLIP_API_BASE_URL}/${id}`);
+  const response = await fetch(`${SLIP_API_BASE_URL}/${id}`, {
+    headers: createAuthHeaders(),
+  });
   if (!response.ok) throw new Error("Slip not found");
   return response.json();
 }
@@ -23,7 +38,7 @@ export async function getSlip(id) {
 export async function createSlip(slip) {
   const response = await fetch(SLIP_API_BASE_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: createAuthHeaders(),
     body: JSON.stringify(slip),
   });
   if (!response.ok) throw new Error("Failed to create slip");
@@ -34,7 +49,7 @@ export async function createSlip(slip) {
 export async function updateSlip(slipData) {
   const response = await fetch(`${SLIP_API_BASE_URL}/${slipData.id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: createAuthHeaders(),
     body: JSON.stringify(slipData),
   });
   if (!response.ok) throw new Error("Failed to update slip");
@@ -45,12 +60,15 @@ export async function updateSlip(slipData) {
 export async function deleteSlip(id) {
   const response = await fetch(`${SLIP_API_BASE_URL}/${id}`, {
     method: "DELETE",
+    headers: createAuthHeaders(),
   });
   if (!response.ok) throw new Error("Failed to delete slip");
   return response.json();
 }
 
 export const getFirms = async () => {
-  const response = await fetch(`${API_BASE_URL}/firms`);
+  const response = await fetch(`${API_BASE_URL}/firms`, {
+    headers: createAuthHeaders(),
+  });
   return await response.json();
 };
