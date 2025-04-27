@@ -224,9 +224,11 @@ const PackingSlipPage = ({ user, handleLogout }) => {
 
 
       {/* Main Body */}
+
       <InputsSection {...{ date, setDate, wayBillNo, setWayBillNo, designNo, setDesignNo, setNo, setSetNo, customerName, setCustomerName, firmName, setFirmName}} />
-      <PackingTable {...{ rows, updateRow, removeRow, addSubItem, handleEnterInQty, qtyRefs }} />
       <FooterActions {...{ totalTaga, totalQty, addRow, additem, handleGeneratePackingPDF, handleGenerateSummaryPDF, handleGenerateCombinedPDF, handleRenumber, handleSaveSlip }} />
+
+      <PackingTable {...{ rows, updateRow, removeRow, addSubItem, handleEnterInQty, qtyRefs }} />
     </div>
   );
 };

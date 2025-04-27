@@ -5,8 +5,8 @@ body {
   margin: 0;
   padding: 0;
   color: #333;
-  overflow: hidden;
-  height: 100vh;
+  overflow: auto; /* Enable scroll for the entire page */
+  height: 100vh; /* Keep the height full for the viewport */
 }
 
 .container {
@@ -242,28 +242,17 @@ button.combined {
   font-weight: 500;
 }
 
-/* Footer styles */
-.footer-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100vw;
+.top-actions-bar {
+  margin-bottom: 20px;
   background: #ffffff;
-  border-top: 1px solid #ccc;
-  padding: 10px 0;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  text-align: center;
-  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.footer-summary {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-}
+
+
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
@@ -280,9 +269,15 @@ button.combined {
   }
 
   .table-wrapper {
-    margin-top: 20px;
+    min-height: 300px;            /* 👈 Minimum height for empty/few rows */
+    max-height: calc(100vh - 300px); /* 👈 Max height based on screen */
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
   }
-
+  
   table {
     min-width: 600px; /* Adjust the minimum width for mobile */
   }
@@ -297,3 +292,64 @@ button.combined {
     padding: 8px 12px;
   }
 }
+
+.button-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.button-bar button {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  background-color: #f7f7f7;
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.button-bar button:hover {
+  background-color: #e0e0e0;
+}
+
+.button-bar .add {
+  background-color: #e0f7fa;
+  border-color: #4dd0e1;
+}
+
+.button-bar .generate {
+  background-color: #fff3e0;
+  border-color: #ffb74d;
+}
+
+.button-bar .summary {
+  background-color: #f3e5f5;
+  border-color: #ba68c8;
+}
+
+.button-bar .combined {
+  background-color: #f1f8e9;
+  border-color: #aed581;
+}
+
+.button-bar .renumber {
+  background-color: #ede7f6;
+  border-color: #9575cd;
+}
+
+.button-bar .save {
+  background-color: #e8f5e9;
+  border-color: #81c784;
+}
+
+
+.slip-summary {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  justify-content: space-between;
+}
+
