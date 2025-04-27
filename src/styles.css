@@ -101,7 +101,7 @@ input:focus {
   border: 1px solid #ddd;
   border-radius: 6px;
   margin-top: 20px;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch;  /* Enable smooth scrolling on touch devices */
 }
 
 /* Scrollbar */
@@ -116,6 +116,12 @@ input:focus {
 }
 
 /* Table styles */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;  /* Enable touch scrolling */
+  width: 100%;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -255,71 +261,39 @@ button.combined {
   font-size: 16px;
   font-weight: 500;
   margin-bottom: 8px;
-  display: block;
+  display: flex;
+  justify-content: space-between;
 }
 
-.footer-actions {
-  display: inline-flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.footer-actions button {
-  padding: 6px 12px;
-  font-size: 14px;
-  background: #1976d2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.footer-actions button:hover {
-  background-color: #115293;
-}
-
-/* Responsive styles */
+/* Mobile responsiveness */
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
-    height: auto;
+    padding: 20px;
   }
 
   h2 {
-    font-size: 22px;
+    font-size: 24px;
   }
 
-  input {
-    font-size: 13px;
+  .inputs-container.compact-inputs input {
+    min-width: 100%;
+  }
+
+  .table-wrapper {
+    margin-top: 20px;
   }
 
   table {
-    min-width: unset;
-    font-size: 13px;
+    min-width: 600px; /* Adjust the minimum width for mobile */
   }
 
   th, td {
-    padding: 10px;
+    padding: 4px 6px;
+    font-size: 0.75rem;
   }
 
   button {
+    font-size: 12px;
     padding: 8px 12px;
-    font-size: 13px;
-  }
-
-  .footer-summary {
-    font-size: 14px;
-  }
-
-  .input-section,
-  .table-section {
-    padding: 16px;
-  }
-
-  .input-section::before,
-  .table-section::before {
-    font-size: 16px;
   }
 }
