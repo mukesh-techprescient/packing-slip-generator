@@ -6,13 +6,12 @@ import FooterActions from "../components/FooterActions";
 import { incrementPackageNumber } from "../utils";
 import { generateSummaryPDF, generatePackingPDF, generateCombinedPDF } from "../pdfGenerator";
 import { PACKAGE_PREFIX } from "../constants";
-import {  getSlip, updateSlip, createSlip,getFirms} from "../api"; // 👈 Import APIs
+import { getSlip, updateSlip, createSlip, getFirms, getLastSlipNumber } from "../api"; // 👈 Import APIs
 
 const PackingSlipPage = ({ user, handleLogout }) => {
   const { id } = useParams(); // 👈 ID from URL if editing
   const navigate = useNavigate();
   const [slipId, setSlipId] = useState(null); // store slip id if editing
-
   const [firmName, setFirmName] = useState("Sujata Trading Company");
   const [customerName, setCustomerName] = useState("");
   const [designNo, setDesignNo] = useState("");
@@ -24,23 +23,23 @@ const PackingSlipPage = ({ user, handleLogout }) => {
   const qtyRefs = useRef([]);
   const [firms, setFirms] = useState([]); // 👈 All firms
 
-
   useEffect(() => {
     loadFirms();
     if (id) {
       loadSlip(id); // load existing slip if editing
+    } else {
+      loadLastSlipNumber(); // Load the last slip number for a new slip
     }
   }, [id]);
-
 
   const loadFirms = async () => {
     const allFirms = await getFirms();
     console.log("Fetched firms:", allFirms);  // 👈 Add this
     setFirms(allFirms || []);
-      // 👉 Set default firm if firmName is not already set
-  if ((!firmName || firmName === "") && allFirms.length > 0) {
-    setFirmName(allFirms[0].firmName);
-  }
+    // 👉 Set default firm if firmName is not already set
+    if ((!firmName || firmName === "") && allFirms.length > 0) {
+      setFirmName(allFirms[0].firmName);
+    }
   };
 
   const loadSlip = async (id) => {
@@ -62,9 +61,23 @@ const PackingSlipPage = ({ user, handleLogout }) => {
           qty: item.qty,
         }));
       });
-  
-      setRows(transformedRows); 
 
+      setRows(transformedRows); 
+    }
+  };
+
+  const loadLastSlipNumber = async () => {
+    const response = await getLastSlipNumber(); // Fetch the last slip number;
+    if (response) {
+      const parsedWayBillNo = parseInt(response.lastWayBillNo.toString().trim(), 10);
+      
+      if (!isNaN(parsedWayBillNo)) {
+        const nextWayBillNo = parsedWayBillNo + 1;
+        setWayBillNo(nextWayBillNo.toString());
+      } else {
+        // Fallback if lastWayBillNo is not a valid number
+        setWayBillNo(''); // or '001', depending on your business logic
+      }
     }
   };
 
@@ -166,7 +179,6 @@ const PackingSlipPage = ({ user, handleLogout }) => {
     }
     navigate("/");
   };
-  
 
   const handleRenumber = () => {
     const wb = wayBillNo.trim();
@@ -186,45 +198,40 @@ const PackingSlipPage = ({ user, handleLogout }) => {
 
   return (
     <div className="container">
-    {/* Header with Home and Logout */}
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-      <div>Logged in as: <strong>{user?.email}</strong></div>
-      <div>
-        <button 
-          onClick={() => navigate("/")} 
-          style={{ marginRight: "10px", padding: "5px 10px", background: "#1976d2", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
-          Home
-        </button>
-        <button 
-          onClick={handleLogout} 
-          style={{ padding: "5px 10px", background: "#f44336", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
-          Logout
-        </button>
+      {/* Header with Home and Logout */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div>Logged in as: <strong>{user?.email}</strong></div>
+        <div>
+          <button 
+            onClick={() => navigate("/")} 
+            style={{ marginRight: "10px", padding: "5px 10px", background: "#1976d2", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+            Home
+          </button>
+          <button 
+            onClick={handleLogout} 
+            style={{ padding: "5px 10px", background: "#f44336", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+            Logout
+          </button>
+        </div>
       </div>
-    </div>
-
-
 
       <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  <span>Sujata - Packing Slip {slipId ? "(Edit Mode)" : "(New)"}</span>
-  <select
-  value={firmName}
-  onChange={(e) => setFirmName(e.target.value)}
-  style={{ marginLeft: '10px', padding: '5px', fontSize: '16px' }}
->
-  <option value="">Select Firm</option>
-  {firms.map((firm) => (
-    <option key={firm.id} value={firm.firmName}>
-      {firm.firmName}
-    </option>
-  ))}
-</select>
-
-</h3>
-
+        <span>Sujata - Packing Slip {slipId ? "(Edit Mode)" : "(New)"}</span>
+        <select
+          value={firmName}
+          onChange={(e) => setFirmName(e.target.value)}
+          style={{ marginLeft: '10px', padding: '5px', fontSize: '16px' }}
+        >
+          <option value="">Select Firm</option>
+          {firms.map((firm) => (
+            <option key={firm.id} value={firm.firmName}>
+              {firm.firmName}
+            </option>
+          ))}
+        </select>
+      </h3>
 
       {/* Main Body */}
-
       <InputsSection {...{ date, setDate, wayBillNo, setWayBillNo, designNo, setDesignNo, setNo, setSetNo, customerName, setCustomerName, firmName, setFirmName}} />
       <FooterActions {...{ totalTaga, totalQty, addRow, additem, handleGeneratePackingPDF, handleGenerateSummaryPDF, handleGenerateCombinedPDF, handleRenumber, handleSaveSlip }} />
 

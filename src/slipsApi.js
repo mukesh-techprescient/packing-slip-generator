@@ -72,3 +72,12 @@ export const getFirms = async () => {
   });
   return await response.json();
 };
+
+// API: Get last slip number
+export const getLastSlipNumber = async () => {
+  const response = await fetch(`${API_BASE_URL}/last-slip-number`, {
+    headers: createAuthHeaders(),
+  });
+  if (!response.ok) throw new Error("Failed to fetch last slip number");
+  return await response.json();
+};
