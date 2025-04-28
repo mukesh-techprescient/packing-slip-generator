@@ -82,7 +82,7 @@ export const generateSummaryPDF = ({ rows, firmName, customerName, designNo,wayB
     <tr>
       <td colspan="3"><strong>Total</strong></td>
       <td><strong>${totalTaga}</strong></td>
-      <td><strong>${totalQty}</strong></td>
+      <td><strong>${totalQty.toFixed(2)}</strong></td>
     </tr>
   `);
   
@@ -212,7 +212,7 @@ export const generatePackingPDF = ({ rows, firmName, customerName, designNo, dat
               `).join("")}
               <tr>
                 <td colspan="3"><strong>Total</strong></td>
-                <td><strong>${totalQty}</strong></td>
+                <td><strong>${totalQty.toFixed(2)}</strong></td>
               </tr>
             </tbody>
           </table>
@@ -353,7 +353,7 @@ export const generateCombinedPDF = ({ rows, firmName, customerName, designNo,way
     <tr>
       <td colspan="3"><strong>Total</strong></td>
       <td><strong>${totalTaga}</strong></td>
-      <td><strong>${totalQty}</strong></td>
+      <td><strong>${totalQty.toFixed(2)}</strong></td>
     </tr>
   `);
   
@@ -403,7 +403,7 @@ export const generateCombinedPDF = ({ rows, firmName, customerName, designNo,way
               `).join("")}
               <tr>
                 <td colspan="3"><strong>Total</strong></td>
-                <td><strong>${totalQty}</strong></td>
+                <td><strong>${totalQty.toFixed(2)}</strong></td>
               </tr>
             </tbody>
           </table>

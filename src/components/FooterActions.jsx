@@ -2,7 +2,7 @@ function FooterActions({ totalTaga, totalQty, addRow, additem, handleGeneratePac
     return (
       <div>
         <div className="slip-summary">
-          Summary - <strong>Total Taga:</strong> {totalTaga} | <strong>Total Mtrs:</strong> {totalQty}
+          Summary - <strong>Total Taga:</strong> {totalTaga} | <strong>Total Mtrs:</strong> {totalQty.toFixed(2)}
         </div>
   
 

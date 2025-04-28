@@ -3,28 +3,37 @@ import { useNavigate } from "react-router-dom";
 import { useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, flexRender } from "@tanstack/react-table";
 import { listSlips, deleteSlip } from "../api";
 import { generatePackingPDF, generateSummaryPDF } from "../pdfGenerator";
-import { FaEye, FaTrash, FaFilePdf, FaPrint } from "react-icons/fa"; // 👈 Import FontAwesome icons
-import { Tooltip } from "react-tooltip"; // Correct named import for react-tooltip
-import { formatDate } from "../utils"; // Adjust the path as necessary
-
+import { FaEye, FaTrash, FaFilePdf, FaPrint } from "react-icons/fa";
+import { Tooltip } from "react-tooltip";
+import { formatDate } from "../utils";
 
 const SlipList = () => {
   const navigate = useNavigate();
   const [slips, setSlips] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState([]);
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [loading, setLoading] = useState(false); // 👈 Loader state
 
   useEffect(() => {
     fetchSlips();
   }, []);
 
-  const fetchSlips = async () => {
-    const data = await listSlips();
-    setSlips(data);
+  const fetchSlips = async (retryCount = 0) => {
+    try {
+      setLoading(true); // Start loader
+      const data = await listSlips();
+      setSlips(data);
+      setLoading(false); // Stop loader
+    } catch (error) {
+      console.error(`Fetch attempt ${retryCount + 1} failed`, error);
+      if (retryCount < 5) {
+        setTimeout(() => fetchSlips(retryCount + 1), 15000); // Retry after 15 sec
+      } else {
+        setLoading(false);
+        alert("Failed to load slips after multiple attempts. Please try again later.");
+      }
+    }
   };
 
   const handleDelete = async (id) => {
@@ -66,118 +75,40 @@ const SlipList = () => {
     });
   };
 
-  const columns = useMemo(
-    () => [
-      {
-        accessorKey: "id",
-        header: "ID",
-        size: 60,
-        cell: (info) => <div style={{ textAlign: "center" }}>{info.getValue()}</div>,
-      },
-      {
-        accessorKey: "date",
-        header: "Date",
-        cell: ({ row }) => (
-          <div style={{ textAlign: "center" }}>
-            {formatDate(row.original.date)} {/* Apply formatDate here */}
+  const columns = useMemo(() => [
+    { accessorKey: "id", header: "ID", size: 60, cell: (info) => <div style={{ textAlign: "center" }}>{info.getValue()}</div> },
+    { accessorKey: "date", header: "Date", cell: ({ row }) => <div style={{ textAlign: "center" }}>{formatDate(row.original.date)}</div> },
+    { accessorKey: "wayBillNo", header: "Waybill No" },
+    { accessorKey: "firmName", header: "Firm Name" },
+    { accessorKey: "customerName", header: "Customer Name" },
+    { accessorKey: "totalQty", header: "Total Meter" },
+    { accessorKey: "totalTaga", header: "Total Taga" },
+    {
+      accessorKey: "actions", header: "Actions", enableSorting: false,
+      cell: ({ row }) => (
+        <div style={{ display: "flex", gap: "8px" }}>
+          <div data-tip="View Slip" onClick={() => navigate(`/slips/${row.original.id}`)} style={{ fontSize: "20px", cursor: "pointer", color: "#616161" }}>
+            <FaEye />
           </div>
-        ),
-      },
-      {
-        accessorKey: "wayBillNo",
-        header: "Waybill No",
-      },
-      {
-        accessorKey: "firmName",
-        header: "Firm Name",
-      },
-      {
-        accessorKey: "customerName",
-        header: "Customer Name",
-      },
-      {
-        accessorKey: "totalQty",
-        header: "Total Meter",
-      },
-      {
-        accessorKey: "totalTaga",
-        header: "Total Taga",
-      },
-      {
-        accessorKey: "actions",
-        header: "Actions",
-        enableSorting: false,
-        cell: ({ row }) => (
-          <div style={{ display: "flex", gap: "8px" }}>
-            {/* View Button */}
-            <div
-              data-tip="View Slip" // Tooltip target
-              onClick={() => navigate(`/slips/${row.original.id}`)}
-              style={{
-                fontSize: "20px",
-                cursor: "pointer",
-                color: "#616161", // Subtle gray color
-              }}
-            >
-              <FaEye />
-            </div>
-
-            {/* Delete Button */}
-            <div
-              data-tip="Delete Slip" // Tooltip target
-              onClick={() => handleDelete(row.original.id)}
-              style={{
-                fontSize: "20px",
-                cursor: "pointer",
-                color: "#d32f2f", // A muted red color
-              }}
-            >
-              <FaTrash />
-            </div>
-
-            {/* Print Packing PDF Button */}
-            <div
-              data-tip="Print Packing Slip" // Tooltip target
-              onClick={() => handleGeneratePackingPDF(row.original)}
-              style={{
-                fontSize: "20px",
-                cursor: "pointer",
-                color: "#1976d2", // Muted blue color
-              }}
-            >
-              <FaFilePdf />
-            </div>
-
-            {/* Print Summary Button */}
-            <div
-              data-tip="Print Summary" // Tooltip target
-              onClick={() => handleGenerateSummaryPDF(row.original)}
-              style={{
-                fontSize: "20px",
-                cursor: "pointer",
-                color: "#FF7043", // Muted orange color
-              }}
-            >
-              <FaPrint />
-            </div>
-
-            {/* Tooltip rendering */}
-            <Tooltip />
+          <div data-tip="Delete Slip" onClick={() => handleDelete(row.original.id)} style={{ fontSize: "20px", cursor: "pointer", color: "#d32f2f" }}>
+            <FaTrash />
           </div>
-        ),
-      },
-    ],
-    [navigate]
-  );
+          <div data-tip="Print Packing Slip" onClick={() => handleGeneratePackingPDF(row.original)} style={{ fontSize: "20px", cursor: "pointer", color: "#1976d2" }}>
+            <FaFilePdf />
+          </div>
+          <div data-tip="Print Summary" onClick={() => handleGenerateSummaryPDF(row.original)} style={{ fontSize: "20px", cursor: "pointer", color: "#FF7043" }}>
+            <FaPrint />
+          </div>
+          <Tooltip />
+        </div>
+      ),
+    },
+  ], [navigate]);
 
   const table = useReactTable({
     data: slips,
     columns,
-    state: {
-      globalFilter,
-      sorting,
-      pagination,
-    },
+    state: { globalFilter, sorting, pagination },
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
@@ -208,8 +139,8 @@ const SlipList = () => {
         </button>
       </div>
 
-      {/* Buttons Row */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
+      {/* Buttons and Loader */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", alignItems: "center" }}>
         <button
           onClick={() => navigate("/slips/new/slip")}
           style={{
@@ -225,7 +156,6 @@ const SlipList = () => {
           + Create Slip
         </button>
 
-        {/* Global Search */}
         <input
           value={globalFilter ?? ""}
           onChange={(e) => setGlobalFilter(e.target.value)}
@@ -240,12 +170,15 @@ const SlipList = () => {
         />
       </div>
 
+      {/* Loader */}
+      {loading && (
+        <div style={{ textAlign: "center", marginBottom: "10px", color: "#1976d2", fontWeight: "bold" }}>
+          Loading slips, please wait...
+        </div>
+      )}
+
       {/* Table */}
-      <table
-        border="1"
-        cellPadding="4"
-        style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}
-      >
+      <table border="1" cellPadding="4" style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -286,12 +219,8 @@ const SlipList = () => {
       {/* Pagination */}
       <div>
         <button onClick={() => table.setPageIndex(0)}>{"<<"}</button>
-        <button onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 1)}>
-          {"<"}
-        </button>
-        <button onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 1)}>
-          {">"}
-        </button>
+        <button onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 1)}>{"<"}</button>
+        <button onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 1)}>{">"}</button>
         <button onClick={() => table.setPageIndex(table.getPageCount() - 1)}>{">>"}</button>
       </div>
     </div>

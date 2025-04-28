@@ -83,7 +83,7 @@ export const generateSummaryHTML = ({ grouped, firmName, customerName, designNo,
                 `).join("")}
                 <tr>
                   <td colspan="3"><strong>Total</strong></td>
-                  <td><strong>${totalQty}</strong></td>
+                  <td><strong>${totalQty.toFixed(2)}</strong></td>
                 </tr>
               </tbody>
             </table>
