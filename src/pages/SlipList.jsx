@@ -81,8 +81,16 @@ const SlipList = () => {
     { accessorKey: "wayBillNo", header: "Waybill No" },
     { accessorKey: "firmName", header: "Firm Name" },
     { accessorKey: "customerName", header: "Customer Name" },
-    { accessorKey: "totalQty", header: "Total Meter" },
-    { accessorKey: "totalTaga", header: "Total Taga" },
+    {
+      accessorKey: "totalQty",
+      header: "Total Meter",
+      cell: ({ row }) => {
+        const qty = row.original.totalQty;
+        const formattedQty = qty !== undefined && qty !== null ? Number(qty).toFixed(2) : "";
+        return <div style={{ textAlign: "center" }}>{formattedQty}</div>;
+      },
+    },
+    { accessorKey: "totalTaga", header: "Total Taga" ,},
     {
       accessorKey: "actions", header: "Actions", enableSorting: false,
       cell: ({ row }) => (
