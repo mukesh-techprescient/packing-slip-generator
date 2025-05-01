@@ -1,6 +1,6 @@
 import {  groupByPackage } from "./utils";
 
-export const generateSummaryPDF = ({ rows, firmName, customerName, designNo,wayBillNo, date, address }) => {
+export const generateSummaryPDF = ({ rows, firmName, customerName, designNo,wayBillNo, date, address,setNumber }) => {
   const grouped = groupByPackage(rows);
   const popup = window.open("", "_blank");
 
@@ -38,7 +38,8 @@ export const generateSummaryPDF = ({ rows, firmName, customerName, designNo,wayB
         </div>
         <div class="customer-name">Customer: ${customerName}</div>
         <div class="address">${address || ''}</div>
-        <div class="meta">Design No: ${designNo} | Date: ${formattedDate}</div>
+        <div class="meta">Date: ${formattedDate} | Design No: ${designNo}</div>
+        <div class="meta">Set No: ${setNumber} </div>
   `);
 
   popup.document.write(`
@@ -112,15 +113,10 @@ export const generateSummaryPDF = ({ rows, firmName, customerName, designNo,wayB
 
 
 
-
-
-
-
-
-
 export const generatePackingPDF = ({ rows, firmName, customerName, designNo, date }) => {
   const grouped = groupByPackage(rows);
   const popup = window.open("", "_blank");
+  const pkgNumbers = Object.keys(grouped);
 
   popup.document.write(`
     <html>
@@ -172,11 +168,70 @@ export const generatePackingPDF = ({ rows, firmName, customerName, designNo, dat
       <body>
   `);
 
-  const pkgNumbers = Object.keys(grouped);
-  for (let i = 0; i < pkgNumbers.length; i += 6) {
-    popup.document.write(`<div class="page">`);
-    const group = pkgNumbers.slice(i, i + 6);
+  let i = 0;
+  let isFirstPage = true;
 
+  while (i < pkgNumbers.length) {
+    let count = 0;
+    let totalItems = 0;
+    const group = [];
+
+    // Logic for first page
+    if (isFirstPage) {
+      while (i + count < pkgNumbers.length) {
+        const pkg = pkgNumbers[i + count];
+        const itemCount = grouped[pkg].length;
+
+        if (totalItems + itemCount <= 12) {
+          group.push(pkg);
+          totalItems += itemCount;
+          count++;
+        } else {
+          break;
+        }
+      }
+
+      // First page logic: decide number of slips per page
+      if (totalItems > 12) {
+        if (count > 4) {
+          group.length = 4; // Use 4 slips per page
+        } else if (count > 2) {
+          group.length = 2; // Use 2 slips per page
+        } else {
+          group.length = 6; // Use 6 slips per page
+        }
+      } else {
+        group.length = Math.min(6, count); // Use a maximum of 6 slips
+      }
+
+      isFirstPage = false;
+    } else {
+      // For subsequent pages, continue with logic to use 2, 4, or 6 slips per page
+      while (i + count < pkgNumbers.length) {
+        const pkg = pkgNumbers[i + count];
+        const itemCount = grouped[pkg].length;
+
+        if (totalItems + itemCount <= 12) {
+          group.push(pkg);
+          totalItems += itemCount;
+          count++;
+        } else {
+          break;
+        }
+      }
+
+      if (totalItems > 12) {
+        if (count > 4) {
+          group.length = 4; // Use 4 slips per page
+        } else if (count > 2) {
+          group.length = 2; // Use 2 slips per page
+        }
+      } else {
+        group.length = Math.min(6, count); // Use up to 6 slips
+      }
+    }
+
+    popup.document.write(`<div class="page">`);
     group.forEach((pkgNum) => {
       const items = grouped[pkgNum];
       const totalQty = items.reduce((sum, item) => sum + Number(item.qty), 0);
@@ -221,6 +276,7 @@ export const generatePackingPDF = ({ rows, firmName, customerName, designNo, dat
     });
 
     popup.document.write(`</div>`);
+    i += group.length; // Proceed to the next set of packages
   }
 
   popup.document.write(`

@@ -31,11 +31,11 @@ function PackingTable({ rows, updateRow, removeRow, addSubItem, handleEnterInQty
                     <input value={row.itemName} onChange={(e) => updateRow(row.index, "itemName", e.target.value)} />
                   </td>
                   <td>
-                    <input type="number" min={1} value={row.taga} onChange={(e) => updateRow(row.index, "taga", e.target.value)} />
+                    <input type="text" min={1} value={row.taga} onChange={(e) => updateRow(row.index, "taga", e.target.value)} />
                   </td>
                   <td>
                     <input
-                      type="number"
+                      type="text"
                       min={1}
                       value={row.qty}
                       onChange={(e) => updateRow(row.index, "qty", e.target.value)}

@@ -131,6 +131,11 @@ const PackingSlipPage = ({ user, handleLogout }) => {
       setEnterPressedForNewRow(true);
       addRow();
     }
+    if (e.key === "ArrowDown") {
+      e.preventDefault(); // Prevents scrolling
+      setEnterPressedForNewRow(true);
+      addSubItem(rows.length-1);
+    }
   };
 
   const handleGenerateSummaryPDF = () => generateSummaryPDF({ rows, firmName, customerName, designNo, wayBillNo, date });
