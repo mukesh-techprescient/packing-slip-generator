@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, flexRender } from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, getFilteredRowModel, getSortedRowModel, flexRender } from "@tanstack/react-table";
 import { listSlips, deleteSlip } from "../api";
 import { generatePackingPDF, generateSummaryPDF } from "../pdfGenerator";
 import { FaEye, FaTrash, FaFilePdf, FaPrint } from "react-icons/fa";
@@ -13,22 +13,30 @@ const SlipList = () => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
-  const [loading, setLoading] = useState(false); // 👈 Loader state
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchSlips();
-  }, []);
+  }, [page, pageSize, globalFilter]);
 
   const fetchSlips = async (retryCount = 0) => {
     try {
-      setLoading(true); // Start loader
-      const data = await listSlips();
-      setSlips(data);
-      setLoading(false); // Stop loader
+      setLoading(true);
+      const response = await listSlips({ 
+        page, 
+        per_page: pageSize, 
+        search: globalFilter // Pass the global filter for search
+      });
+      setSlips(response.slips);
+      setTotalPages(Math.ceil(response.total / pageSize));
+      setLoading(false);
     } catch (error) {
       console.error(`Fetch attempt ${retryCount + 1} failed`, error);
       if (retryCount < 5) {
-        setTimeout(() => fetchSlips(retryCount + 1), 15000); // Retry after 15 sec
+        setTimeout(() => fetchSlips(retryCount + 1), 15000);
       } else {
         setLoading(false);
         alert("Failed to load slips after multiple attempts. Please try again later.");
@@ -90,7 +98,7 @@ const SlipList = () => {
         return <div style={{ textAlign: "center" }}>{formattedQty}</div>;
       },
     },
-    { accessorKey: "totalTaga", header: "Total Taga" ,},
+    { accessorKey: "totalTaga", header: "Total Taga" },
     {
       accessorKey: "actions", header: "Actions", enableSorting: false,
       cell: ({ row }) => (
@@ -116,14 +124,13 @@ const SlipList = () => {
   const table = useReactTable({
     data: slips,
     columns,
-    state: { globalFilter, sorting, pagination },
+    state: { globalFilter, sorting, pagination: { pageIndex: page - 1, pageSize } },
     onGlobalFilterChange: setGlobalFilter,
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
@@ -225,11 +232,12 @@ const SlipList = () => {
       </table>
 
       {/* Pagination */}
-      <div>
-        <button onClick={() => table.setPageIndex(0)}>{"<<"}</button>
-        <button onClick={() => table.setPageIndex(table.getState().pagination.pageIndex - 1)}>{"<"}</button>
-        <button onClick={() => table.setPageIndex(table.getState().pagination.pageIndex + 1)}>{">"}</button>
-        <button onClick={() => table.setPageIndex(table.getPageCount() - 1)}>{">>"}</button>
+      <div style={{ marginTop: "12px", display: "flex", justifyContent: "center", gap: "10px" }}>
+        <button onClick={() => setPage(1)} disabled={page === 1}>{"<<"}</button>
+        <button onClick={() => setPage((prev) => Math.max(prev - 1, 1))} disabled={page === 1}>{"<"}</button>
+        <span style={{ fontSize: "12px", lineHeight: "24px" }}>Page {page} of {totalPages}</span>
+        <button onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))} disabled={page === totalPages}>{">"}</button>
+        <button onClick={() => setPage(totalPages)} disabled={page === totalPages}>{">>"}</button>
       </div>
     </div>
   );
