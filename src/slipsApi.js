@@ -16,14 +16,26 @@ const createAuthHeaders = () => {
   };
 }
 
-// API: List all slips
-export async function listSlips() {
-  const response = await fetch(SLIP_API_BASE_URL, {
+// API: List all slips with pagination and search
+export async function listSlips({ page, per_page, search }) {
+  const queryParams = new URLSearchParams({
+    page: page.toString(),
+    per_page: per_page.toString(),
+    search: search || '',  // Handle if search is undefined or empty
+  });
+
+  const response = await fetch(`${SLIP_API_BASE_URL}?${queryParams}`, {
     headers: createAuthHeaders(),
   });
-  if (!response.ok) throw new Error("Failed to fetch slips");
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch slips");
+  }
+
   return response.json();
 }
+
+
 
 // API: Get slip by ID
 export async function getSlip(id) {
