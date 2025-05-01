@@ -155,34 +155,52 @@ const SlipList = () => {
       </div>
 
       {/* Buttons and Loader */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", alignItems: "center" }}>
-        <button
-          onClick={() => navigate("/slips/new/slip")}
-          style={{
-            padding: "4px 8px",
-            fontSize: "12px",
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", alignItems: "center", gap: "20px" }}>
+
+      <button
+      onClick={() => navigate("/slips/new/slip")}
+      style={{
+        padding: "4px 8px",
+        fontSize: "12px",
+        backgroundColor: "#4CAF50",
+        color: "white",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+      }}
+    >
           + Create Slip
         </button>
 
-        <input
-          value={globalFilter ?? ""}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Search..."
-          style={{
-            padding: "4px",
-            fontSize: "12px",
-            borderRadius: "4px",
-            border: "1px solid #ccc",
-            width: "250px",
-          }}
-        />
+        <button
+      onClick={() => navigate("/sizing")}
+      style={{
+        padding: "4px 8px",
+        fontSize: "12px",
+        backgroundColor: "#4CAF50",
+        color: "white",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+      }}
+    >
+          + Sizing Calculator
+        </button>
+
+  <input
+    value={globalFilter ?? ""}
+    onChange={(e) => setGlobalFilter(e.target.value)}
+    placeholder="Search..."
+    style={{
+      padding: "4px",
+      fontSize: "12px",
+      borderRadius: "4px",
+      border: "1px solid #ccc",
+      width: "250px",
+      textAlign: "right", // Keep the text aligned right
+      marginLeft: "auto", // This will push the search input to the right
+    }}
+  />
       </div>
 
       {/* Loader */}

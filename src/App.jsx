@@ -4,6 +4,7 @@ import PackingSlipPage from "./pages/PackingSlipPage";
 import Login from "./pages/Login";
 import SlipList from "./pages/SlipList";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import SizingCalculatorInput from "./pages/SizingCalculatorInput";
 
 // Helper function to check if token is expired
 function isTokenExpired(token) {
@@ -60,6 +61,15 @@ function App() {
         element={
           isAuthenticated 
             ? <PackingSlipPage user={user} handleLogout={handleLogout} /> 
+            : <Navigate to="/login" />
+        } 
+      />
+
+<Route 
+        path="/sizing" 
+        element={
+          isAuthenticated 
+            ? <SizingCalculatorInput user={user} handleLogout={handleLogout} /> 
             : <Navigate to="/login" />
         } 
       />
